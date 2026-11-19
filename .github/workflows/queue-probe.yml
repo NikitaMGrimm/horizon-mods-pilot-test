@@ -1,0 +1,13 @@
+name: queue-probe
+on: workflow_dispatch
+concurrency:
+  group: probe-${{ github.run_id }}
+  cancel-in-progress: true
+jobs:
+  hold:
+    runs-on: ubuntu-latest
+    concurrency:
+      group: probe-slot
+      queue: max
+    steps:
+      - run: date -u +%T; sleep 45; date -u +%T
