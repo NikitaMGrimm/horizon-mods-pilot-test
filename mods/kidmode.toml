@@ -55,6 +55,14 @@ tags = ["kids", "peaceful", "taming", "pets", "invulnerable", "friendly-mobs"]
 screenshots = ["screenshots/kidmode/1.jpg"]
 
 [[versions]]
+version = "0.11.1"
+published = "2026-11-19"
+game = "26.3"
+file = "kidmode-0.11.1.hmod"
+sha256 = "b56e0df8a88367a076cf3c7cdae41501486d7115532d3c00e05a023a6b924c13"
+changelog = "Pilot test version."
+
+[[versions]]
 version = "0.11.0"
 published = "2026-11-18"
 game = "26.3"
