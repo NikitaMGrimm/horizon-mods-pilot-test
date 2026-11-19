@@ -9,8 +9,8 @@ It is one when all of these hold:
   b. it changes exactly one file from where it leaves main: a modified mods/<id>.toml (live, a regular file), and
      that entry is the same on main now;
   c. the head's entry is that entry with one or more [[versions]] records added, every other value unchanged;
-  d. its kind is resourcepack, shader or datapack: the launcher puts their files where nothing is run as a mod
-     (resourcepacks/, shaderpacks/, a world's datapacks/) and every mod, native or not, keeps a reviewer;
+  d. its kind is resourcepack, shader or datapack, and each new file has its kind's extension: extra files in them
+     are accepted but never loaded (README, "Updates"), and every mod, native or not, keeps a reviewer;
   e. GitHub's numeric id of whoever opened it is in the entry's owner_ids (never a login or the description);
   f. the id is not in revoked.toml. When the entry has a key, each new version has a signature (the check verified
      it).
@@ -28,6 +28,8 @@ import sys
 import tomllib
 
 KINDS = {"resourcepack": "a resource pack", "shader": "a shader pack", "datapack": "a data pack"}
+# The index build that `check` runs refuses other extensions too; checked here as well since no reviewer follows.
+EXTENSIONS = {"resourcepack": ".zip", "shader": ".hshader", "datapack": ".zip"}
 ENTRY = re.compile(r"mods/([a-z0-9_]{1,64})\.toml")
 SHA = re.compile(r"[0-9a-f]{40}")
 
@@ -84,6 +86,9 @@ def eligible(changes, base_text, head_text, main_text, revoked_text, author_id):
         raise Refused("it doesn't only add versions: every earlier record stays as it was, in its order")
     if any(not isinstance(v, dict) for v in added):
         raise Refused("a new version is not a record")
+    for v in added:
+        if not (isinstance(v.get("file"), str) and v["file"].endswith(EXTENSIONS[kind])):
+            raise Refused(f"version {v.get('version')!r}'s file is not a {EXTENSIONS[kind]}")
     ids = base.get("owner_ids")
     if not isinstance(ids, list) or not ids:
         raise Refused(f"{path} has no owner_ids")

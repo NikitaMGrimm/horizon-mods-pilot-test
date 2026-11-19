@@ -25,10 +25,11 @@ class Eligible(unittest.TestCase):
         # Newest first or last: the entries on main do both.
         self.assertEqual(run(head=TOP + OLD + NEW)[2], ["1.1.0"])
         self.assertEqual(run(head=TOP + NEW + NEW.replace("1.1.0", "1.2.0") + OLD)[2], ["1.1.0", "1.2.0"])
-        for kind in ("shader", "datapack"):
+        for kind, ext in (("shader", ".hshader"), ("datapack", ".zip")):
             with self.subTest(kind=kind):
                 top = TOP.replace("resourcepack", kind)
-                self.assertEqual(run(base=top + OLD, head=top + NEW + OLD)[1], kind)
+                old, new = OLD.replace(".zip", ext), NEW.replace(".zip", ext)
+                self.assertEqual(run(base=top + old, head=top + new + old)[1], kind)
 
     def test_a_signed_entry_needs_signed_versions(self):
         top = TOP + 'key = "RWQ"\n'
@@ -62,6 +63,9 @@ class Eligible(unittest.TestCase):
             "only add versions   ": dict(base=TOP + OLD + NEW.replace("1.1.0", "0.9.0"),
                                          head=TOP + NEW.replace("1.1.0", "0.9.0") + NEW + OLD),
             "changed on main": dict(main=TOP + NEW + OLD),
+            "file is not a .zip": dict(head=TOP + NEW.replace("1.1.0.zip", "1.1.0.hmod") + OLD),
+            "file is not a .hshader": dict(base=TOP.replace("resourcepack", "shader") + OLD,
+                                           head=TOP.replace("resourcepack", "shader") + NEW + OLD),
             "in revoked.toml": dict(revoked=REVOKED + REVOKED.replace('"other"', '"pack"')),
             "doesn't parse": dict(head="id = "),
             "has id": dict(base=TOP.replace('"pack"', '"other"') + OLD, head=TOP.replace('"pack"', '"other"') + NEW),
@@ -69,6 +73,14 @@ class Eligible(unittest.TestCase):
         for why, args in cases.items():
             with self.subTest(why=why), self.assertRaisesRegex(ou.Refused, why.strip()):
                 run(**args)
+
+    def test_an_archived_id_reactivation_waits_for_a_maintainer(self):
+        # A new mods/<id>.toml for an id under archive/: its check's owner step stays red until a maintainer confirms
+        # the owner by hand, so it never merges by itself, even from an owner adding only versions.
+        for changes in ((("A", PATH),), (("A", PATH), ("M", "archive/native-v1/mods/pack.toml")),
+                        (("A", PATH), ("D", "archive/api-0.1/mods/pack.toml"))):
+            with self.subTest(changes=changes), self.assertRaisesRegex(ou.Refused, "more than one modified"):
+                run(base="", main="", head=TOP + NEW + OLD, changes=changes)
 
     def test_same_is_strict_about_types(self):
         self.assertTrue(ou.same({"a": [1, "x"]}, {"a": [1, "x"]}))

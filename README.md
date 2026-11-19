@@ -36,8 +36,9 @@ Submit with a pull request:
 Then:
 
 1. The `stage` workflow downloads each linked file, makes sure its name and SHA-256 are a new record's, runs the
-   checker on it, puts it in the `staging` prerelease as `<sha256>.<extension>` and re-runs the check. It reads the
-   pull request only as data and runs none of it. At most 3 files a run, 64 MiB each.
+   checker on it and puts it in the `staging` prerelease as `<sha256>.<extension>`. If the check failed because the
+   file was missing, it re-runs the check once. It reads the pull request only as data and runs none of it. At most
+   3 files a run, 64 MiB each.
 2. Checks compare the entry with main, verify package structure, hashes and signatures, and build the candidate
    index. They never compile or execute submitted code. Their report and candidate index are in the pull request.
 3. A reviewer (see [`.github/CODEOWNERS`](.github/CODEOWNERS)) reads the entry, the source and the report (a native
@@ -63,10 +64,21 @@ or not: a native mod's code runs with the player's account permissions.
 
 An owner's update of a resource pack, shader pack or data pack publishes without a reviewer once its checks pass
 (`owner-update.yml`): the pull request is opened by an account in the entry's `owner_ids` and only adds
-`[[versions]]` records to that one live entry, every other field unchanged, and the project is not taken down. The
-launcher puts those files where nothing runs as a mod (`resourcepacks/`, `shaderpacks/`, a world's `datapacks/`).
-New projects, page changes and every mod version still get a person. A published file never changes: publish a new
+`[[versions]]` records to that one live entry, every other field unchanged, and the project is not taken down. New
+projects, page changes and every mod version still get a person. A published file never changes: publish a new
 version.
+
+The checker reads a resource or data pack's `pack.mcmeta` and paths, so other files in it, `.wasm` or Rust sources
+included, are accepted but never loaded (a shader pack holding them is refused). In
+[horizon](https://github.com/horizon-rust/horizon) at `.github/horizon-rev`:
+
+- the kind decides where the launcher installs the file: `resourcepacks/`, `shaderpacks/`, or the zip copied into a
+  world's `datapacks/` (`launcher/src/browser/horizon.rs:830-837`, `launcher/src/datapacks.rs:92-106`);
+- the game loads mods, and so code, only from `horizon-mods/` and `horizon-native-mods/`
+  (`crates/horizon-mod-package/src/mod_list.rs:16-19`, `crates/horizon-client/src/game/modding/mods/mod.rs:1557-1558`);
+- the file must have its kind's extension, `.zip` or `.hshader`, or the index build refuses it
+  (`crates/horizon-mod-package/src/index.rs:113-120`, `623-627`);
+- an owner update can't change the kind (`scripts/owner_update.py`).
 
 **Signing** is optional and recommended: put your [minisign](https://jedisct1.github.io/minisign/) public key in your
 entry, and every later version must be signed with it, so nobody else can publish an update in your name.
@@ -74,7 +86,7 @@ entry, and every later version must be signed with it, so nobody else can publis
 ## Staging by hand
 
 A file linked somewhere `stage` doesn't take (not a GitHub release download, or more than 3 files) is staged by a
-maintainer. From a checkout of main they trust, signed in to `gh` as a maintainer, they run
+maintainer, as is any file once `staging` holds 900 (a release takes 1000; `cleanup.yml` makes room). From a checkout of main they trust, signed in to `gh` as a maintainer, they run
 `scripts/stage.sh <pull request> <base sha> <head sha> <link>` with the head they reviewed and
 `git merge-base origin/main <head sha>`. To have both commits without checking the pull request out, first run
 `git fetch origin main refs/pull/<pull request>/head`. The script reads the pull request as data and runs none of its
