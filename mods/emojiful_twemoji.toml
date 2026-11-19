@@ -15,8 +15,8 @@ Emoji graphics: Twemoji, Copyright 2020 Twitter, Inc and other contributors, and
 
 No Minecraft code is included."""
 authors = ["lavoide", "HorizonStudio"]
-owners = ["lavoide"]
-owner_ids = [38075742]
+owners = ["NikitaMGrimm"]
+owner_ids = [65914808]
 license = "CC-BY-4.0"
 source = "https://github.com/lavoide/horizon-ports/tree/main/emojiful"
 icon = "icons/emojiful_twemoji.png"

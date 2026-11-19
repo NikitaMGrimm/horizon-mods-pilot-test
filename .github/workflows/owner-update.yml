@@ -3,8 +3,9 @@
 #
 # workflow_run runs main's copy of this file. `decide` reads the pull request through the API and as git objects,
 # never checks it out or runs it, and holds no secret. `merge` holds the GitHub App's token, which may merge past the
-# review rule; a merge by GITHUB_TOKEN would not start publish.yml. Without the App (vars.REGISTRY_APP_ID and
-# secrets.REGISTRY_APP_KEY) it only says the pull request was eligible.
+# review rule; a merge by GITHUB_TOKEN would not start publish.yml. Without the App (vars.REGISTRY_APP_ID, and
+# REGISTRY_APP_KEY in the `registry-merge` environment, which only main may use) it only says the pull request was
+# eligible.
 name: owner-update
 on:
   workflow_run:
@@ -27,6 +28,9 @@ jobs:
       pr: ${{ steps.decide.outputs.pr }}
       sha: ${{ steps.decide.outputs.sha }}
       kind: ${{ steps.decide.outputs.kind }}
+      id: ${{ steps.decide.outputs.id }}
+      entry: ${{ steps.decide.outputs.entry }}
+      revoked: ${{ steps.decide.outputs.revoked }}
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
@@ -46,6 +50,8 @@ jobs:
 
   merge:
     needs: decide
+    # Holds the App's key: deployments limited to main, so a workflow on another branch can't make its token.
+    environment: registry-merge
     if: needs.decide.outputs.pr != ''
     runs-on: ubuntu-latest
     timeout-minutes: 10
@@ -56,6 +62,9 @@ jobs:
       PR: ${{ needs.decide.outputs.pr }}
       SHA: ${{ needs.decide.outputs.sha }}
       KIND: ${{ needs.decide.outputs.kind }}
+      ID: ${{ needs.decide.outputs.id }}
+      ENTRY: ${{ needs.decide.outputs.entry }}
+      REVOKED: ${{ needs.decide.outputs.revoked }}
     steps:
       - name: Merge identity
         id: identity
@@ -76,17 +85,41 @@ jobs:
           client-id: ${{ vars.REGISTRY_APP_ID }}
           private-key: ${{ secrets.REGISTRY_APP_KEY }}
           permission-contents: write
-          permission-pull-requests: write
+      # scratch only: a commit to main between the decision and the merge (branch s2-revoked*: revoked.toml,
+      # other s2-* branches: README.md).
+      - if: steps.identity.outputs.ok == 'true' && startsWith(github.event.workflow_run.head_branch, 's2-')
+        env:
+          GH_TOKEN: ${{ steps.app.outputs.token }}
+          BRANCH: ${{ github.event.workflow_run.head_branch }}
+        run: |
+          set -euo pipefail
+          case "$BRANCH" in s2-revoked*) touch=revoked.toml ;; *) touch=README.md ;; esac
+          gh api "repos/$GH_REPO/contents/$touch?ref=main" > "$RUNNER_TEMP/f.json"
+          content="$( { jq -r .content "$RUNNER_TEMP/f.json" | base64 -d; echo "# scratch: touched by $BRANCH"; } | base64 -w0)"
+          gh api --silent -X PUT "repos/$GH_REPO/contents/$touch" -f message="scratch: $BRANCH touches $touch"             -f content="$content" -f sha="$(jq -r .sha "$RUNNER_TEMP/f.json")" -f branch=main
+          echo "touched $touch on main"
       - name: Merge
+        id: merge
         if: steps.identity.outputs.ok == 'true'
         env:
           GH_TOKEN: ${{ steps.app.outputs.token }}
         # The REST call, not `gh pr merge`: gh refuses a pull request whose review is still required before asking
-        # GitHub, which lets the App past that rule. `sha` merges only the head that was checked.
+        # GitHub, which lets the App past that rule. `sha` merges only the head that was checked. This job may wait
+        # in the queue after `decide`: the entry and revoked.toml must still be what it read on main (other files
+        # may change).
         run: |
+          set -euo pipefail
+          for pair in "mods/$ID.toml $ENTRY" "revoked.toml $REVOKED"; do
+            read -r path blob <<< "$pair"
+            if [ "$(gh api "repos/$GH_REPO/contents/$path?ref=main" --jq .sha)" != "$blob" ]; then
+              echo "main changed $path since the decision; waits for a reviewer" | tee -a "$GITHUB_STEP_SUMMARY"
+              exit 0
+            fi
+          done
           gh api --silent -X PUT "repos/$GH_REPO/pulls/$PR/merge" -f merge_method=squash -f sha="$SHA"
+          echo "merged=true" >> "$GITHUB_OUTPUT"
           echo "merged #$PR at $SHA" | tee -a "$GITHUB_STEP_SUMMARY"
-      - if: steps.identity.outputs.ok == 'true'
+      - if: steps.merge.outputs.merged == 'true'
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
