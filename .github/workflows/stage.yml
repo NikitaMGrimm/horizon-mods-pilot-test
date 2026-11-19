@@ -58,7 +58,10 @@ jobs:
           echo "count=$(ls "$RUNNER_TEMP/files" | wc -l)" >> "$GITHUB_OUTPUT"
           [ $status = 0 ] && echo "records=$(jq length "$RUNNER_TEMP/files.json")" >> "$GITHUB_OUTPUT"
           exit $status
+      # The token only reads the checker's release and its attestation; the next step runs without it.
       - if: steps.files.outputs.count > 0
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: scripts/install-tool.sh
       - name: Check each file
         if: steps.files.outputs.count > 0

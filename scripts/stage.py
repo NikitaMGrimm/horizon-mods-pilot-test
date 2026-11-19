@@ -152,7 +152,9 @@ def last_segment(url):
 
 def link(body, file):
     """The one GitHub release download in `body` whose file name is `file`."""
-    named = list(dict.fromkeys(u for u in URL.findall(body) if last_segment(u) == file))
+    # A sentence may end right after a link.
+    urls = (u.rstrip(".,;:!?") for u in URL.findall(body))
+    named = list(dict.fromkeys(u for u in urls if last_segment(u) == file))
     github = [u for u in named if RELEASE.fullmatch(u)]
     if len(github) > 1:
         raise Refused(f"{len(github)} different links to {shown(file)}: link one")

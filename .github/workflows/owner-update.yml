@@ -81,8 +81,10 @@ jobs:
         if: steps.identity.outputs.ok == 'true'
         env:
           GH_TOKEN: ${{ steps.app.outputs.token }}
+        # The REST call, not `gh pr merge`: gh refuses a pull request whose review is still required before asking
+        # GitHub, which lets the App past that rule. `sha` merges only the head that was checked.
         run: |
-          gh pr merge "$PR" --squash --match-head-commit "$SHA"
+          gh api --silent -X PUT "repos/$GH_REPO/pulls/$PR/merge" -f merge_method=squash -f sha="$SHA"
           echo "merged #$PR at $SHA" | tee -a "$GITHUB_STEP_SUMMARY"
       - if: steps.identity.outputs.ok == 'true'
         env:

@@ -149,6 +149,8 @@ def decide(env):
     pr = json.loads(gh("api", f"repos/{repo}/pulls/{n}"))
     if (pr["state"], pr["base"]["ref"], pr["head"]["sha"]) != ("open", "main", sha):
         raise Refused(f"#{n} is not open into main at {sha}")
+    if pr.get("draft"):
+        raise Refused(f"#{n} is a draft")
     runs = json.loads(gh("api", f"repos/{repo}/commits/{sha}/check-runs?check_name=check&per_page=100"))
     if not check_passed(runs["check_runs"]):
         raise Refused(f"the required check `check` is not a success on {sha}")

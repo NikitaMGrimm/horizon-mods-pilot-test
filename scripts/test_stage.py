@@ -23,9 +23,9 @@ LINK = "https://github.com/someone/pack/releases/download/v1.1.0/pack-1.1.0.zip"
 
 class Links(unittest.TestCase):
     def test_markdown_angle_and_plain_links_are_found(self):
-        for body in (f"[file]({LINK})", f"<{LINK}>", f"File: {LINK}.", f"{LINK}\n{LINK}"):
+        for body in (f"[file]({LINK})", f"<{LINK}>", f"File: {LINK}.", f"{LINK}, or {LINK}\n"):
             with self.subTest(body=body):
-                self.assertEqual(stage.link(body.removesuffix("."), "pack-1.1.0.zip"), LINK)
+                self.assertEqual(stage.link(body, "pack-1.1.0.zip"), LINK)
 
     def test_an_encoded_name_is_its_file(self):
         url = "https://github.com/someone/pack/releases/download/v1/pack%2Bmc.zip"
