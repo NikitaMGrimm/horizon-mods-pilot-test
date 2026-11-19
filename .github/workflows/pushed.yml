@@ -1,0 +1,12 @@
+# Scratch only: stands in for publish.yml, to show which merges start a push workflow.
+name: pushed
+on:
+  push:
+    branches: [main]
+jobs:
+  pushed:
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "push by $ACTOR"
+        env:
+          ACTOR: ${{ github.actor }}

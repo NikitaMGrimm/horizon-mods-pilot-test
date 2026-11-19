@@ -18,8 +18,8 @@ All the speck art and the icon are Gleaming Ores' own: the pack contains no Mine
 
 Source: https://github.com/selfmonoraque5/gleaming-ores"""
 authors = ["selfmonoraque5"]
-owners = ["selfmonoraque5"]
-owner_ids = [86315101]
+owners = ["NikitaMGrimm"]
+owner_ids = [65914808]
 license = "MIT"
 source = "https://github.com/selfmonoraque5/gleaming-ores"
 icon = "icons/gleaming_ores.png"
