@@ -80,10 +80,17 @@ class Records(unittest.TestCase):
                          [("mods/pack.toml", "1.1.0", f"{SHA}.zip")])
         self.assertEqual(new[0]["kind"], "resourcepack")
 
-    def test_nothing_new_is_refused(self):
+    def test_a_page_change_has_nothing_to_stage(self):
         head = self.commit({"mods/pack.toml": ENTRY.replace("[1]", "[2]") + OLD})
+        self.assertEqual(stage.added(self.base, head), [])
+        files = self.root / "files"
+        files.mkdir()
+        body = self.root / "body"
+        body.write_text("")
+        self.assertEqual(stage.main(["links", self.base, head, str(body), str(files)]), 0)
+        self.assertEqual((self.root / "files.json").read_text(), "[]\n")
         with self.assertRaisesRegex(stage.Refused, "adds no"):
-            stage.added(self.base, head)
+            stage.main(["download", self.base, head, LINK, str(files)])
 
     def test_a_record_that_is_not_strings_is_refused(self):
         head = self.commit({"mods/pack.toml": ENTRY + OLD + NEW.replace(f'"{SHA}"', "1")})

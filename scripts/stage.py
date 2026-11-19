@@ -14,8 +14,8 @@ is new in head names its file name and SHA-256. It is downloaded from GitHub (64
   stage.py check <dir>                             `cargo horizon-mod check` of each file `links` wrote
   stage.py verify <base> <head> <dir>              every file in <dir> is a new record's, rehashed
 
-`download` and `links` write <dir>/<sha256>.<ext> and <dir>/../<dir name>.json (what each file is: its entry's
-path, id, kind, key, and the record). `verify` prints the names it checked.
+`download` and `links` write <dir>/<sha256>.<ext> and <dir>/../<dir name>.json (each new record: its entry's
+path, id, kind and key, the record, and whether staging already had its file). `verify` prints the names it checked.
 Needs git and python3 3.11+.
 """
 import hashlib
@@ -104,8 +104,6 @@ def added(base, head):
                         "key": key if isinstance(key, str) else None, "version": version, "file": file,
                         "sha256": sha, "signature": signature if isinstance(signature, str) else None,
                         "name": staged_name(sha, file)})
-    if not out:
-        raise Refused("the pull request adds no [[versions]] record with a version, a file and a sha256 to mods/")
     return out
 
 
@@ -186,6 +184,8 @@ def check(out):
     inspects the file and runs none of it."""
     failed = 0
     for r in json.loads((out.parent / f"{out.name}.json").read_text()):
+        if r["staged"]:
+            continue
         args = ["cargo", "horizon-mod", "check", str(out / r["name"]), "--kind", str(r["kind"])]
         if r["key"]:
             if not r["signature"]:
@@ -214,6 +214,12 @@ def main(argv):
         return check(pathlib.Path(rest[0]))
     base, head = rest[0], rest[1]
     new = added(base, head)
+    if not new and mode != "verify":
+        if mode == "links":
+            print("no new [[versions]] record: nothing to stage")
+            plan(pathlib.Path(rest[3]), [])
+            return 0
+        raise Refused("the pull request adds no [[versions]] record with a version, a file and a sha256 to mods/")
     if mode == "download":
         url, out = rest[2], pathlib.Path(rest[3])
         name = last_segment(url)
@@ -226,7 +232,7 @@ def main(argv):
         for r in matching:
             if r["sha256"] == sha and r["name"]:
                 partial.rename(out / r["name"])
-                plan(out, [r])
+                plan(out, [{**r, "staged": False}])
                 print(f"{r['path']}: version {shown(r['version'])}, {shown(r['file'])}, SHA-256 {sha}")
                 return 0
         partial.unlink()
@@ -236,16 +242,17 @@ def main(argv):
     if mode == "links":
         body, out = pathlib.Path(rest[2]).read_text(encoding="utf-8", errors="replace"), pathlib.Path(rest[3])
         have = set(pathlib.Path(rest[4]).read_text().split()) if len(rest) == 5 else set()
-        todo = [r for r in new if r["name"] not in have or r["name"] is None]
         for r in new:
-            if r not in todo:
+            r["staged"] = r["name"] in have
+            if r["staged"]:
                 print(f"{r['path']}: version {shown(r['version'])}: staging already has {r['name']}")
+        todo = [r for r in new if not r["staged"]]
         if len(todo) > MAX_FILES:
             raise Refused(f"{len(todo)} new files: at most {MAX_FILES} are staged automatically; "
                           "a maintainer stages them with scripts/stage.sh")
         for r in todo:
             fetch(r, link(body, r["file"]), out)
-        plan(out, todo)
+        plan(out, new)
         return 0
     out = pathlib.Path(rest[2])
     names = {r["name"]: r for r in new if r["name"]}

@@ -87,4 +87,5 @@ jobs:
       - if: steps.identity.outputs.ok == 'true'
         env:
           GH_TOKEN: ${{ github.token }}
-        run: gh pr comment "$PR" --body "Published automatically: owner update of $KIND."
+        run: |
+          gh pr comment "$PR" --body "Published automatically: owner update of $KIND."

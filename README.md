@@ -36,8 +36,8 @@ Submit with a pull request:
 Then:
 
 1. The `stage` workflow downloads each linked file, makes sure its name and SHA-256 are a new record's, runs the
-   checker on it and puts it in the `staging` prerelease as `<sha256>.<extension>`. It reads the pull request only
-   as data and runs none of it. At most 3 files a run, 64 MiB each.
+   checker on it, puts it in the `staging` prerelease as `<sha256>.<extension>` and re-runs the check. It reads the
+   pull request only as data and runs none of it. At most 3 files a run, 64 MiB each.
 2. Checks compare the entry with main, verify package structure, hashes and signatures, and build the candidate
    index. They never compile or execute submitted code. Their report and candidate index are in the pull request.
 3. A reviewer (see [`.github/CODEOWNERS`](.github/CODEOWNERS)) reads the entry, the source and the report, and asks
