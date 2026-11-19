@@ -45,8 +45,8 @@ friends join your world. Some smaller touches from earlier versions aren't possi
 Copyright © 2026 veinmine. Kid Mode is free software under the GNU General Public License, version 3 or
 (at your option) any later version."""
 authors = ["veinmine"]
-owners = ["veinmine"]
-owner_ids = [358269339]
+owners = ["NikitaMGrimm"]
+owner_ids = [65914808]
 license = "GPL-3.0-or-later"
 source = "https://github.com/veinmine/kidmode"
 icon = "icons/kidmode.png"
