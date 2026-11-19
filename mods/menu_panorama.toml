@@ -26,6 +26,14 @@ categories = ["gui", "themed"]
 tags = ["panorama", "main-menu", "title-screen", "wallpaper", "background"]
 
 [[versions]]
+version = "1.0.4"
+published = "2026-11-19"
+game = "26.3"
+file = "menu_panorama-1.0.4.zip"
+sha256 = "aa8b629ead999bf044155e4ea43747ecddd407bf09cee754feb96a86fcb63333"
+changelog = "Pilot test version."
+
+[[versions]]
 version = "1.0.0"
 published = "2026-10-31"
 game = "26.3"
