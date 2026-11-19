@@ -1,7 +1,7 @@
 id = "menu_panorama"
 kind = "resourcepack"
 name = "Menu Panorama"
-summary = "Put your own wallpaper behind the main menu in Horizon — Minecraft 26.3, rewritten in Rust."
+summary = "Put your own wallpaper behind the main menu in Horizon — Minecraft 26.3, rewritten in Rust. (page edit)"
 description = """
 Menu Panorama is a resource pack for **Horizon** — Minecraft: Java Edition 26.3, rewritten from scratch in **Rust**.
 
