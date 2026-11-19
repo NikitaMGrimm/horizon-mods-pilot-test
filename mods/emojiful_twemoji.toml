@@ -24,6 +24,14 @@ categories = ["fonts", "gui"]
 tags = ["homestead", "port"]
 
 [[versions]]
+version = "0.1.2"
+published = "2026-11-19"
+game = "26.3"
+file = "emojiful_twemoji-0.1.2.zip"
+sha256 = "7f46e19ed09ad7da94c35c80430d9ba10229116cbe370b97163834455b88a92b"
+changelog = "Pilot test version."
+
+[[versions]]
 version = "0.1.1"
 published = "2026-11-11"
 game = "26.3"
