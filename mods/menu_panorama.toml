@@ -25,6 +25,16 @@ icon = "icons/menu_panorama.png"
 categories = ["gui", "themed"]
 tags = ["panorama", "main-menu", "title-screen", "wallpaper", "background"]
 
+key = "RWQ"
+
+[[versions]]
+version = "1.0.6"
+published = "2026-11-19"
+game = "26.3"
+file = "menu_panorama-1.0.6.zip"
+sha256 = "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+changelog = "Pilot test version."
+
 [[versions]]
 version = "1.0.0"
 published = "2026-10-31"
