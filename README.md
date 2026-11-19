@@ -40,8 +40,9 @@ Then:
    pull request only as data and runs none of it. At most 3 files a run, 64 MiB each.
 2. Checks compare the entry with main, verify package structure, hashes and signatures, and build the candidate
    index. They never compile or execute submitted code. Their report and candidate index are in the pull request.
-3. A reviewer (see [`.github/CODEOWNERS`](.github/CODEOWNERS)) reads the entry, the source and the report, and asks
-   for changes in the pull request if needed. An owner's update of a pack skips this step (see Updates below).
+3. A reviewer (see [`.github/CODEOWNERS`](.github/CODEOWNERS)) reads the entry, the source and the report (a native
+   mod's source also gets a security review), and asks for changes in the pull request if needed. An owner's update
+   of a pack skips this step (see Updates below).
 4. Merging publishes it: the file becomes a release, the project appears on the site and in the launcher within
    minutes.
 

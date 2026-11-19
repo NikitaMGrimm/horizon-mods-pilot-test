@@ -138,7 +138,7 @@ jobs:
             exit 1
           fi
           if [ "$conclusion" = failure ]; then
-            gh api -X POST "repos/$GH_REPO/actions/runs/$id/rerun-failed-jobs"
+            gh api --silent -X POST "repos/$GH_REPO/actions/runs/$id/rerun-failed-jobs"
             echo "re-ran the check (run $id)" | tee -a "$GITHUB_STEP_SUMMARY"
           else
             echo "the check (run $id) ended $conclusion: nothing to re-run"
