@@ -1,7 +1,7 @@
 # Horizon mods
 
 The registry of what is made for [Horizon](https://github.com/horizon-rust/horizon): mods (`.hmod`), modpacks (`.hpack`)
-and resource packs, each one reviewed before it is published. Browse them at
+and resource packs. Every new project and every mod version is reviewed before it is published. Browse them at
 [playhorizon.dev/mods](https://playhorizon.dev/mods) or in the launcher (Mods, then Horizon beside Modrinth).
 
 Players install through the launcher, which verifies each reviewed package's SHA-256 and, when the project has a
@@ -41,7 +41,7 @@ Then:
 2. Checks compare the entry with main, verify package structure, hashes and signatures, and build the candidate
    index. They never compile or execute submitted code. Their report and candidate index are in the pull request.
 3. A reviewer (see [`.github/CODEOWNERS`](.github/CODEOWNERS)) reads the entry, the source and the report, and asks
-   for changes in the pull request if needed.
+   for changes in the pull request if needed. An owner's update of a pack skips this step (see Updates below).
 4. Merging publishes it: the file becomes a release, the project appears on the site and in the launcher within
    minutes.
 
@@ -57,8 +57,15 @@ cargo horizon-mod check target/horizon-mod/my_mod.hmod
 ```
 
 **Updates** come the same way: a pull request adds a version to your entry, and a reviewer reads it before it is
-published. Only an entry's `owners` can add versions, and every version of a native mod is reviewed, owner or
-not: its code runs with the player's account permissions. A published file never changes: publish a new version.
+published. Only an entry's `owners` can add versions, and every version of a mod, native or not, is reviewed, owner
+or not: a native mod's code runs with the player's account permissions.
+
+An owner's update of a resource pack, shader pack or data pack publishes without a reviewer once its checks pass
+(`owner-update.yml`): the pull request is opened by an account in the entry's `owner_ids` and only adds
+`[[versions]]` records to that one live entry, every other field unchanged, and the project is not taken down. The
+launcher puts those files where nothing runs as a mod (`resourcepacks/`, `shaderpacks/`, a world's `datapacks/`).
+New projects, page changes and every mod version still get a person. A published file never changes: publish a new
+version.
 
 **Signing** is optional and recommended: put your [minisign](https://jedisct1.github.io/minisign/) public key in your
 entry, and every later version must be signed with it, so nobody else can publish an update in your name.
@@ -89,6 +96,7 @@ why.
 | `revoked.toml` | Files taken down |
 | `.github/workflows/stage.yml` | A pull request's new files, into `staging` |
 | `.github/workflows/check.yml` | A pull request's checks |
+| `.github/workflows/owner-update.yml` | After the check: merges an owner's update of a resource, shader or data pack |
 | `.github/workflows/publish.yml` | On merge: releases, then `index.json` on Pages |
 | `.github/workflows/cleanup.yml` | Weekly: staging files nobody needs any more |
 | `archive/native-v1/mods/` | Frozen original native-project histories, including earlier `.hmod` releases, and their dependent modpack; never installed or validated as current packages |
