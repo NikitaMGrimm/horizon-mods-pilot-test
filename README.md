@@ -163,3 +163,5 @@ protected release workflow; registry packages do not acquire invented signing ke
 Any future third-party build must run without write/signing credentials and outside any cache scope trusted
 publishers restore; only bounded, digest-checked data may cross into a separate publisher. It must never execute
 uploaded artifacts or scripts in that publisher. There is no such build job to enable in this cutover.
+
+Pilot test line.

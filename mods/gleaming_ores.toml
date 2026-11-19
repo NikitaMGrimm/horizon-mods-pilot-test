@@ -27,6 +27,14 @@ categories = ["blocks", "16x", "vanilla-like"]
 tags = ["ores", "glowing", "animated", "emissive", "mining", "shine"]
 
 [[versions]]
+version = "1.0.2"
+published = "2026-11-19"
+game = "26.3"
+file = "gleaming_ores-1.0.2.zip"
+sha256 = "967913e857a9e22ebed5e17d9b05db1925654fbe300df3bbcd9f18df174e13ad"
+changelog = "Pilot test version."
+
+[[versions]]
 version = "1.0.0"
 published = "2026-11-11"
 game = "26.3"
