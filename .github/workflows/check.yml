@@ -123,6 +123,3 @@ jobs:
           { echo "## Owner"; echo "$msg"; echo '```'; cat "$file"; echo '```'; } >> "$GITHUB_STEP_SUMMARY"
           echo "::error::$msg"
           exit 1
-      # scratch only: a failed first attempt stays running for 4 minutes, so stage's upload ends first.
-      - if: failure() && github.run_attempt == 1
-        run: sleep 240

@@ -85,19 +85,6 @@ jobs:
           client-id: ${{ vars.REGISTRY_APP_ID }}
           private-key: ${{ secrets.REGISTRY_APP_KEY }}
           permission-contents: write
-      # scratch only: a commit to main between the decision and the merge (branch s2-revoked*: revoked.toml,
-      # other s2-* branches: README.md).
-      - if: steps.identity.outputs.ok == 'true' && startsWith(github.event.workflow_run.head_branch, 's2-')
-        env:
-          GH_TOKEN: ${{ steps.app.outputs.token }}
-          BRANCH: ${{ github.event.workflow_run.head_branch }}
-        run: |
-          set -euo pipefail
-          case "$BRANCH" in s2-revoked*) touch=revoked.toml ;; *) touch=README.md ;; esac
-          gh api "repos/$GH_REPO/contents/$touch?ref=main" > "$RUNNER_TEMP/f.json"
-          content="$( { jq -r .content "$RUNNER_TEMP/f.json" | base64 -d; echo "# scratch: touched by $BRANCH"; } | base64 -w0)"
-          gh api --silent -X PUT "repos/$GH_REPO/contents/$touch" -f message="scratch: $BRANCH touches $touch"             -f content="$content" -f sha="$(jq -r .sha "$RUNNER_TEMP/f.json")" -f branch=main
-          echo "touched $touch on main"
       - name: Merge
         id: merge
         if: steps.identity.outputs.ok == 'true'
