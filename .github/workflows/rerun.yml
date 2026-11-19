@@ -1,0 +1,24 @@
+name: rerun
+on:
+  pull_request_target:
+    branches: [main]
+permissions:
+  actions: write
+jobs:
+  rerun:
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ github.token }}
+      GH_REPO: ${{ github.repository }}
+      HEAD: ${{ github.event.pull_request.head.sha }}
+    steps:
+      - run: |
+          for i in $(seq 40); do
+            run=$(gh api "repos/$GH_REPO/actions/workflows/check.yml/runs?head_sha=$HEAD&event=pull_request" --jq '.workflow_runs[0] | "\(.id) \(.status) \(.conclusion)"')
+            echo "$run"
+            case "$run" in *" completed "*) break;; esac
+            sleep 10
+          done
+          id=${run%% *}
+          gh api -X POST "repos/$GH_REPO/actions/runs/$id/rerun"
+          echo rerun requested

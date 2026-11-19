@@ -1,0 +1,13 @@
+name: check
+on:
+  pull_request:
+    branches: [main]
+permissions:
+  contents: read
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - run: |
+          echo "attempt ${{ github.run_attempt }} actor ${{ github.actor }} triggering ${{ github.triggering_actor }}"
+          [ "${{ github.run_attempt }}" != 1 ]

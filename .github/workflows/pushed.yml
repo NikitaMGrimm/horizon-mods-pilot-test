@@ -1,0 +1,9 @@
+name: pushed
+on:
+  push:
+    branches: [main]
+jobs:
+  pushed:
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "push by ${{ github.actor }} ${{ github.event.head_commit.message }}"

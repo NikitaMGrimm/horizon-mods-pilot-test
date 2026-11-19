@@ -1,0 +1,13 @@
+name: wr
+on:
+  workflow_run:
+    workflows: [check]
+    types: [completed]
+jobs:
+  wr:
+    runs-on: ubuntu-latest
+    steps:
+      - env:
+          EV: ${{ toJSON(github.event.workflow_run) }}
+        run: |
+          echo "$EV" | jq '{conclusion, run_attempt, event, path, head_sha, head_branch, actor: .actor.login, triggering_actor: .triggering_actor.login, prs: [.pull_requests[].number]}'
