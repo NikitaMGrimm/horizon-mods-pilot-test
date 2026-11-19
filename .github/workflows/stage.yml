@@ -109,7 +109,7 @@ jobs:
       HEAD: ${{ github.event.pull_request.head.sha }}
       BASE: ${{ needs.fetch.outputs.base }}
       # A release takes 1000 files; automatic staging leaves the rest to maintainers and cleanup.yml.
-      CEILING: 900
+      CEILING: 10
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
