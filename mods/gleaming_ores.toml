@@ -1,7 +1,7 @@
 id = "gleaming_ores"
 kind = "resourcepack"
 name = "Gleaming Ores"
-summary = "Animated, glowing ores: a shine sweeps across every ore, so you spot them in the dark. No mods needed"
+summary = "Animated, glowing ores: a shine sweeps across every ore, so you spot them in the dark. No mods needed (pilot)"
 description = """
 Ores that shine. Every ore gets new, animated specks that glow in their own colours, so they stand out in a dark cave: cyan diamonds, green emeralds, gold nuggets, red redstone and more.
 
@@ -25,6 +25,14 @@ source = "https://github.com/selfmonoraque5/gleaming-ores"
 icon = "icons/gleaming_ores.png"
 categories = ["blocks", "16x", "vanilla-like"]
 tags = ["ores", "glowing", "animated", "emissive", "mining", "shine"]
+
+[[versions]]
+version = "1.0.3"
+published = "2026-11-19"
+game = "26.3"
+file = "gleaming_ores-1.0.3.zip"
+sha256 = "0072ce614f9be9ca2d5923a8e93c0a483fc7b5b42dc632195e6781953ae0fac4"
+changelog = "Pilot test version."
 
 [[versions]]
 version = "1.0.0"
